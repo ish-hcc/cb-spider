@@ -12,6 +12,7 @@
 package connect
 
 import (
+	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
 

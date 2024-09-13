@@ -167,7 +167,8 @@ func showTestHandlerInfo() {
 	cblogger.Info("11. PriceInfoHandler")
 	cblogger.Info("12. ClusterHandler")
 	cblogger.Info("13. TagHandler")
-	cblogger.Info("14. Exit")
+	cblogger.Info("14. MonitoringHandler")
+	cblogger.Info("15. Exit")
 	cblogger.Info("==========================================================")
 }
 
@@ -221,6 +222,8 @@ func getResourceHandler(resourceType string, config Config) (interface{}, error)
 		resourceHandler, err = cloudConnection.CreateClusterHandler()
 	case "tag":
 		resourceHandler, err = cloudConnection.CreateTagHandler()
+	case "monitoring":
+		resourceHandler, err = cloudConnection.CreateMonitoringHandler()
 	}
 
 	if err != nil {
@@ -2116,6 +2119,125 @@ Loop:
 	}
 }
 
+func testMonitoringHandlerListPrint() {
+	cblogger.Info("Test MonitoringHandler")
+	cblogger.Info("0. Print Menu")
+	cblogger.Info("1. GetVMMetricData()")
+	cblogger.Info("2. Exit")
+}
+
+func testMonitoringHandlerMetricTypeListPrint() {
+	cblogger.Info("Metric Types")
+	cblogger.Info("1. CPUUsage")
+	cblogger.Info("2. MemoryUsage")
+	cblogger.Info("3. DiskRead")
+	cblogger.Info("4. DiskWrite")
+	cblogger.Info("5. DiskReadOps")
+	cblogger.Info("6. DiskWriteOps")
+	cblogger.Info("7. NetworkIn")
+	cblogger.Info("8. NetworkOut")
+}
+
+func testMonitoringHandler(config Config) {
+	resourceHandler, err := getResourceHandler("monitoring", config)
+	if err != nil {
+		cblogger.Error(err)
+		return
+	}
+	monitoringHandler := resourceHandler.(irs.MonitoringHandler)
+
+	testMonitoringHandlerListPrint()
+Loop:
+	for {
+		var commandNum int
+		inputCnt, err := fmt.Scan(&commandNum)
+		if err != nil {
+			cblogger.Error(err)
+		}
+
+		if inputCnt == 1 {
+			switch commandNum {
+			case 0:
+				testMonitoringHandlerListPrint()
+			case 1:
+				cblogger.Info("Start GetMetricData() ...")
+
+				fmt.Println("=== Enter VM's name ===")
+				in := bufio.NewReader(os.Stdin)
+				vmName, err := in.ReadString('\n')
+				if err != nil {
+					cblogger.Error(err)
+				}
+				vmName = strings.TrimSpace(vmName)
+
+				fmt.Println("=== Enter metric type (Default: cpu_usage) ===")
+				testMonitoringHandlerMetricTypeListPrint()
+				inputCnt, err := fmt.Scan(&commandNum)
+				if err != nil {
+					cblogger.Error(err)
+				}
+				var metricType irs.MetricType
+				if inputCnt == 1 {
+					switch commandNum {
+					case 1:
+						metricType = irs.CPUUsage
+					case 2:
+						metricType = irs.MemoryUsage
+					case 3:
+						metricType = irs.DiskRead
+					case 4:
+						metricType = irs.DiskWrite
+					case 5:
+						metricType = irs.DiskReadOps
+					case 6:
+						metricType = irs.DiskWriteOps
+					case 7:
+						metricType = irs.NetworkIn
+					case 8:
+						metricType = irs.NetworkOut
+					default:
+						cblogger.Error("Invalid input")
+					}
+				}
+
+				fmt.Println("=== Enter period (minute) (Default: 1m) ===")
+				in = bufio.NewReader(os.Stdin)
+				periodMinute, err := in.ReadString('\n')
+				if err != nil {
+					cblogger.Error(err)
+				}
+				periodMinute = strings.TrimSpace(periodMinute)
+
+				fmt.Println("=== Enter time before (hour) (Default: 1h) ===")
+				in = bufio.NewReader(os.Stdin)
+				timeBeforeHour, err := in.ReadString('\n')
+				if err != nil {
+					cblogger.Error(err)
+				}
+				timeBeforeHour = strings.TrimSpace(timeBeforeHour)
+
+				if getVMMetricData, err := monitoringHandler.GetVMMetricData(
+					irs.MonitoringReqInfo{
+						VMIID: irs.IID{
+							NameId: vmName,
+						},
+						MetricType:     metricType,
+						IntervalMinute: periodMinute,
+						TimeBeforeHour: timeBeforeHour,
+					}); err != nil {
+					cblogger.Error(err)
+				} else {
+					spew.Dump(getVMMetricData)
+				}
+				cblogger.Info("Finish GetVMMetricData()")
+			case 2:
+				cblogger.Info("Exit")
+				break Loop
+			}
+		}
+	}
+}
+
 func main() {
 	showTestHandlerInfo()
 	config := readConfigFile()
@@ -2169,6 +2291,9 @@ Loop:
 				testTagHandler(config)
 				showTestHandlerInfo()
 			case 14:
+				testMonitoringHandler(config)
+				showTestHandlerInfo()
+			case 15:
 				cblogger.Info("Exit Test ResourceHandler Program")
 				break Loop
 			}

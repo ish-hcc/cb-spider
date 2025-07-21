@@ -1040,6 +1040,7 @@ definitions:
     - sg
     - keypair
     - vm
+    - vmmonitoring
     - nlb
     - disk
     - myimage
@@ -1055,6 +1056,7 @@ definitions:
     - SG
     - KEY
     - VM
+    - VMMONITORING
     - NLB
     - DISK
     - MYIMAGE

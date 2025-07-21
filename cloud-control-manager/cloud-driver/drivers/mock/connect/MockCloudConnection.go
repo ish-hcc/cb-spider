@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"errors"
 	cblog "github.com/cloud-barista/cb-log"
 	mkrs "github.com/cloud-barista/cb-spider/cloud-control-manager/cloud-driver/drivers/mock/resources"
 	idrv "github.com/cloud-barista/cb-spider/cloud-control-manager/cloud-driver/interfaces"
@@ -122,4 +123,8 @@ func (cloudConn *MockConnection) CreateTagHandler() (irs.TagHandler, error) {
 	cblogger.Info("Mock Driver: called CreateTagHandler()!")
 	handler := mkrs.MockTagHandler{MockName: cloudConn.MockName}
 	return &handler, nil
+}
+
+func (cloudConn *MockConnection) CreateMonitoringHandler() (irs.MonitoringHandler, error) {
+	return nil, errors.New("Mock Driver: not implemented")
 }

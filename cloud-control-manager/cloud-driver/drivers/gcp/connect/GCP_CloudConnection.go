@@ -12,6 +12,7 @@ package connect
 
 import (
 	"context"
+	"errors"
 
 	cblog "github.com/cloud-barista/cb-log"
 	gcprs "github.com/cloud-barista/cb-spider/cloud-control-manager/cloud-driver/drivers/gcp/resources"
@@ -186,4 +187,8 @@ func (cloudConn *GCPCloudConnection) CreateTagHandler() (irs.TagHandler, error) 
 	}
 
 	return &tagHandler, nil
+}
+
+func (cloudConn *GCPCloudConnection) CreateMonitoringHandler() (irs.MonitoringHandler, error) {
+	return nil, errors.New("GCP Cloud Driver: not implemented")
 }

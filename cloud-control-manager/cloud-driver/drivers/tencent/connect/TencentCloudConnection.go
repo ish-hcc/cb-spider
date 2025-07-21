@@ -164,3 +164,7 @@ func (cloudConn *TencentCloudConnection) CreateTagHandler() (irs.TagHandler, err
 	}
 	return &handler, nil
 }
+
+func (cloudConn *TencentCloudConnection) CreateMonitoringHandler() (irs.MonitoringHandler, error) {
+	return nil, errors.New("Tencent Driver: not implemented")
+}
